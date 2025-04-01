@@ -8,6 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -43,37 +44,95 @@
         .crypto-price {
             color: #333;
         }
+        .alert-container {
+            width: 60%;
+            margin-top: 20px;
+        }
+        .alert-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .alert-item label {
+            margin-right: 10px;
+        }
+        .alert-item input {
+            width: 45%;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 10px; 
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <div>
-        <h1>Real-Time Crypto Prices</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Cryptocurrency</th>
-                    <th>Price (USDT)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Bitcoin (BTC)</td>
-                    <td class="crypto-price" id="btc-price"></td>
-                </tr>
-                <tr>
-                    <td>Ethereum (ETH)</td>
-                    <td class="crypto-price" id="eth-price"></td>
-                </tr>
-                <tr>
-                    <td>Solana (SOL)</td>
-                    <td class="crypto-price" id="sol-price"></td>
-                </tr>
-                <tr>
-                    <td>TAO (TAO)</td>
-                    <td class="crypto-price" id="tao-price"></td>
-                </tr>
-            </tbody>
-        </table>
+    <h1>Real-Time Crypto Prices</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Cryptocurrency</th>
+                <th>Price (USDT)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Bitcoin (BTC)</td>
+                <td class="crypto-price" id="btc-price"></td>
+            </tr>
+            <tr>
+                <td>Ethereum (ETH)</td>
+                <td class="crypto-price" id="eth-price"></td>
+            </tr>
+            <tr>
+                <td>Solana (SOL)</td>
+                <td class="crypto-price" id="sol-price"></td>
+            </tr>
+            <tr>
+                <td>TAO (TAO)</td>
+                <td class="crypto-price" id="tao-price"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="alert-container">
+        <h3>Set Price Alerts</h3>
+        <form id="alert-form">
+            <div class="alert-item">
+                <label for="btc-alert-high">BTC Alert (USDT):</label>
+                <input type="number" id="btc-alert-high" placeholder="BTC high alert price" />
+                <input type="number" id="btc-alert-low" placeholder="BTC low alert price" />
+                <button type="button" onclick="setAlert('BTC')">Set Alert</button>
+            </div>
+            <div class="alert-item">
+                <label for="eth-alert-high">ETH Alert (USDT):</label>
+                <input type="number" id="eth-alert-high" placeholder="ETH high alert price" />
+                <input type="number" id="eth-alert-low" placeholder="ETH low alert price" />
+                <button type="button" onclick="setAlert('ETH')">Set Alert</button>
+            </div>
+            <div class="alert-item">
+                <label for="sol-alert-high">SOL Alert (USDT):</label>
+                <input type="number" id="sol-alert-high" placeholder="SOL high alert price" />
+                <input type="number" id="sol-alert-low" placeholder="SOL low alert price" />
+                <button type="button" onclick="setAlert('SOL')">Set Alert</button>
+            </div>
+            <div class="alert-item">
+                <label for="tao-alert-high">TAO Alert (USDT):</label>
+                <input type="number" id="tao-alert-high" placeholder="TAO high alert price" />
+                <input type="number" id="tao-alert-low" placeholder="TAO low alert price" />
+                <button type="button" onclick="setAlert('TAO')">Set Alert</button>
+            </div>
+        </form>
     </div>
 
     <script>
@@ -84,6 +143,24 @@
             document.getElementById('eth-price').textContent = prices.ETH.toFixed(2);
             document.getElementById('sol-price').textContent = prices.SOL.toFixed(2);
             document.getElementById('tao-price').textContent = prices.TAO.toFixed(2);
+        }
+
+        async function setAlert(symbol) {
+            const highPrice = document.getElementById(`${symbol.toLowerCase()}-alert-high`).value;
+            const lowPrice = document.getElementById(`${symbol.toLowerCase()}-alert-low`).value;
+            
+            const alerts = {
+                [`${symbol}_high`]: highPrice,
+                [`${symbol}_low`]: lowPrice
+            };
+            
+            await fetch('/set-alerts', {
+                method: 'POST',
+                body: JSON.stringify(alerts),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
         }
 
         setInterval(fetchPrices, 5000); // Update prices every 5 seconds
