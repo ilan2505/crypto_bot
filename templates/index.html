@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Prices</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            text-align: center;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e9e9e9;
+        }
+        h1 {
+            color: #007BFF;
+            margin-bottom: 20px;
+        }
+        .crypto-price {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Real-Time Crypto Prices</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Cryptocurrency</th>
+                    <th>Price (USDT)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Bitcoin (BTC)</td>
+                    <td class="crypto-price" id="btc-price"></td>
+                </tr>
+                <tr>
+                    <td>Ethereum (ETH)</td>
+                    <td class="crypto-price" id="eth-price"></td>
+                </tr>
+                <tr>
+                    <td>Solana (SOL)</td>
+                    <td class="crypto-price" id="sol-price"></td>
+                </tr>
+                <tr>
+                    <td>TAO (TAO)</td>
+                    <td class="crypto-price" id="tao-price"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchPrices() {
+            const response = await fetch('/prices');
+            const prices = await response.json();
+            document.getElementById('btc-price').textContent = prices.BTC.toFixed(2);
+            document.getElementById('eth-price').textContent = prices.ETH.toFixed(2);
+            document.getElementById('sol-price').textContent = prices.SOL.toFixed(2);
+            document.getElementById('tao-price').textContent = prices.TAO.toFixed(2);
+        }
+
+        setInterval(fetchPrices, 5000); // Update prices every 5 seconds
+        fetchPrices(); // Fetch prices immediately when the page loads
+    </script>
+</body>
+</html>
