@@ -4,6 +4,7 @@
 * 2 - send alerts to a telegram bot
 * 3 - web prices
 * 4 - web alerts button directly on telegram
+* 5 - Cryptos charts with plotly
   
 # Results
 ### step 2 :
@@ -23,6 +24,9 @@
 <p align="center">
   <img align="center" width=70% src = "https://github.com/user-attachments/assets/6764ff1c-2f8b-417e-8c12-f9b3e1d118bf"/>
 </p> <br>
+
+### step 5 :
+
 
 <p align="center">
   <img align="left" width=45% src = "https://github.com/user-attachments/assets/81d09197-5c0a-40b8-9f63-7efe6d654280"/>
