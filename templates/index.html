@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Prices</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
             margin: 0;
             background-color: #f4f4f9;
+            min-height: 100vh;
+            overflow-y: auto; /* Permettre le défilement si le contenu dépasse */
+            padding-bottom: 20px;
         }
         table {
             width: 50%;
@@ -74,6 +76,19 @@
         button:hover {
             background-color: #0056b3;
         }
+        .chart-container {
+            width: 80%;
+            margin-top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .chart {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
@@ -85,23 +100,8 @@
                 <th>Price (USDT)</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>Bitcoin (BTC)</td>
-                <td class="crypto-price" id="btc-price"></td>
-            </tr>
-            <tr>
-                <td>Ethereum (ETH)</td>
-                <td class="crypto-price" id="eth-price"></td>
-            </tr>
-            <tr>
-                <td>Solana (SOL)</td>
-                <td class="crypto-price" id="sol-price"></td>
-            </tr>
-            <tr>
-                <td>TAO (TAO)</td>
-                <td class="crypto-price" id="tao-price"></td>
-            </tr>
+        <tbody id="crypto-table-body">
+            <!-- This will be populated dynamically with JavaScript -->
         </tbody>
     </table>
     
@@ -135,14 +135,77 @@
         </form>
     </div>
 
+    <div class="chart-container">
+        <h2>Crypto Price Charts</h2>
+    
+        <div class="crypto-chart" id="chart-BTC">
+            <h3>Bitcoin (BTC)</h3>
+            <label for="interval-BTC">Interval:</label>
+            <select id="interval-BTC" onchange="updateChart('BTC')">
+                <option value="1m">1 min</option>
+                <option value="30m">30 min</option>
+                <option value="1h">1 hour</option>
+                <option value="4h">4 hours</option>
+                <option value="1d">1 day</option>
+            </select>
+            <div id="plot-BTC" class="chart"></div>
+        </div>
+    
+        <div class="crypto-chart" id="chart-ETH">
+            <h3>Ethereum (ETH)</h3>
+            <label for="interval-ETH">Interval:</label>
+            <select id="interval-ETH" onchange="updateChart('ETH')">
+                <option value="1m">1 min</option>
+                <option value="30m">30 min</option>
+                <option value="1h">1 hour</option>
+                <option value="4h">4 hours</option>
+                <option value="1d">1 day</option>
+            </select>
+            <div id="plot-ETH" class="chart"></div>
+        </div>
+    
+        <div class="crypto-chart" id="chart-SOL">
+            <h3>Solana (SOL)</h3>
+            <label for="interval-SOL">Interval:</label>
+            <select id="interval-SOL" onchange="updateChart('SOL')">
+                <option value="1m">1 min</option>
+                <option value="30m">30 min</option>
+                <option value="1h">1 hour</option>
+                <option value="4h">4 hours</option>
+                <option value="1d">1 day</option>
+            </select>
+            <div id="plot-SOL" class="chart"></div>
+        </div>
+    
+        <div class="crypto-chart" id="chart-TAO">
+            <h3>TAO (TAO)</h3>
+            <label for="interval-TAO">Interval:</label>
+            <select id="interval-TAO" onchange="updateChart('TAO')">
+                <option value="1m">1 min</option>
+                <option value="30m">30 min</option>
+                <option value="1h">1 hour</option>
+                <option value="4h">4 hours</option>
+                <option value="1d">1 day</option>
+            </select>
+            <div id="plot-TAO" class="chart"></div>
+        </div>
+    </div>
+    
+
     <script>
         async function fetchPrices() {
             const response = await fetch('/prices');
             const prices = await response.json();
-            document.getElementById('btc-price').textContent = prices.BTC.toFixed(2);
-            document.getElementById('eth-price').textContent = prices.ETH.toFixed(2);
-            document.getElementById('sol-price').textContent = prices.SOL.toFixed(2);
-            document.getElementById('tao-price').textContent = prices.TAO.toFixed(2);
+            const tableBody = document.getElementById('crypto-table-body');
+            tableBody.innerHTML = ''; // Clear current table rows
+            Object.keys(prices).forEach(symbol => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${symbol}</td>
+                    <td class="crypto-price" id="${symbol.toLowerCase()}-price">${prices[symbol].toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
         }
 
         async function setAlert(symbol) {
@@ -163,8 +226,60 @@
             });
         }
 
+        async function updateChart(symbol) {
+            const interval = document.getElementById(`interval-${symbol}`).value;
+
+            // Récupérer l'état actuel du zoom (horizontal et vertical)
+            const chartDiv = document.getElementById(`plot-${symbol}`);
+            const currentLayout = chartDiv.layout || {};
+
+            const response = await fetch(`/chart-data/${symbol}/${interval}`);
+            const data = await response.json();
+
+            if (!data.times) return;
+
+            const times = data.times.map(t => new Date(t));
+            const trace = {
+                x: times,
+                open: data.opens,
+                high: data.highs,
+                low: data.lows,
+                close: data.closes,
+                type: 'candlestick',
+                name: symbol,
+                increasing: { line: { color: 'green' } },
+                decreasing: { line: { color: 'red' } },
+                hovertemplate: 
+                    `<b>Date: %{x|%Y-%m-%d %H:%M:%S}</b><br>
+                    Open: %{open}<br>
+                    High: %{high}<br>
+                    Low: %{low}<br>
+                    Close: %{close}<br>
+                    Price: %{y}<br>`, // Affiche le prix au survol
+                hovermode: 'closest', // Permet d'afficher un tooltip au point le plus proche
+            };
+
+            const layout = {
+                title: `${symbol} Price Chart`,
+                xaxis: {
+                    title: 'Time',
+                    rangeslider: { visible: true },
+                    range: currentLayout.xaxis ? currentLayout.xaxis.range : undefined, // Conserve le zoom horizontal
+                },
+                yaxis: {
+                    title: 'Price (USDT)',
+                    fixedrange: false, // Permet le zoom vertical
+                    range: currentLayout.yaxis ? currentLayout.yaxis.range : undefined // Conserve le zoom vertical
+                }
+            };
+            Plotly.react(chartDiv, [trace], layout);
+        }
+
         setInterval(fetchPrices, 5000); // Update prices every 5 seconds
         fetchPrices(); // Fetch prices immediately when the page loads
-    </script>
+        
+        setInterval(fetchChartData, 5000); // Update chart data every 5 seconds
+        fetchChartData(); // Fetch chart data immediately when the page loads
+   </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 import requests
 import json
+import time
 
 app = Flask(__name__)
 
@@ -26,6 +27,9 @@ triggered_alerts = {
     'TAO': {'high': False, 'low': False},
 }
 
+# Store historical prices for chart
+historical_prices = {symbol: [] for symbol in ['BTC', 'ETH', 'SOL', 'TAO']}
+
 # Telegram bot parameters
 TELEGRAM_TOKEN = "7787717036:AAH3zANzCy2tbRGzcKb9xj7IyIioT3yh-A4"
 CHAT_ID = "974690608"
@@ -49,6 +53,7 @@ def get_crypto_prices():
         response = requests.get(url)
         data = response.json()
         prices[symbol] = float(data['price'])
+        historical_prices[symbol].append({'time': time.time(), 'price': prices[symbol]})
     return prices
 
 # Function to check alerts (high and low)
@@ -120,6 +125,41 @@ def send_message():
         send_telegram_message(user_message)
         return jsonify({'status': 'success', 'message': user_message})
     return jsonify({'status': 'error', 'message': 'No message provided'}), 400
+
+# New route to plot crypto graphs.
+@app.route('/chart-data/<symbol>/<interval>')
+def get_chart_data(symbol, interval):
+    symbol = symbol.upper()
+
+    interval_map = {
+        "1m": "1m",
+        "30m": "30m",
+        "1h": "1h",
+        "4h": "4h",
+        "1d": "1d"
+    }
+
+    binance_interval = interval_map.get(interval, "1m")
+    limit = 100  # Nombre de chandeliers à récupérer
+
+    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}USDT&interval={binance_interval}&limit={limit}"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch candlestick data'}), 500
+
+    klines = response.json()
+
+    data = {
+        'times': [k[0] for k in klines],
+        'opens': [float(k[1]) for k in klines],
+        'highs': [float(k[2]) for k in klines],
+        'lows': [float(k[3]) for k in klines],
+        'closes': [float(k[4]) for k in klines]
+    }
+
+    return jsonify(data)
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
