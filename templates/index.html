@@ -14,7 +14,7 @@
             margin: 0;
             background-color: #f4f4f9;
             min-height: 100vh;
-            overflow-y: auto; /* Permettre le défilement si le contenu dépasse */
+            overflow-y: auto;
             padding-bottom: 20px;
         }
         table {
@@ -63,7 +63,7 @@
             padding: 5px;
             border-radius: 5px;
             border: 1px solid #ccc;
-            margin-right: 10px; 
+            margin-right: 10px;
         }
         button {
             padding: 5px 10px;
@@ -101,108 +101,84 @@
             </tr>
         </thead>
         <tbody id="crypto-table-body">
-            <!-- This will be populated dynamically with JavaScript -->
+            <!-- Populated dynamically -->
         </tbody>
     </table>
-    
+
     <div class="alert-container">
         <h3>Set Price Alerts</h3>
         <form id="alert-form">
-            <div class="alert-item">
-                <label for="btc-alert-high">BTC Alert (USDT):</label>
-                <input type="number" id="btc-alert-high" placeholder="BTC high alert price" />
-                <input type="number" id="btc-alert-low" placeholder="BTC low alert price" />
-                <button type="button" onclick="setAlert('BTC')">Set Alert</button>
-            </div>
-            <div class="alert-item">
-                <label for="eth-alert-high">ETH Alert (USDT):</label>
-                <input type="number" id="eth-alert-high" placeholder="ETH high alert price" />
-                <input type="number" id="eth-alert-low" placeholder="ETH low alert price" />
-                <button type="button" onclick="setAlert('ETH')">Set Alert</button>
-            </div>
-            <div class="alert-item">
-                <label for="sol-alert-high">SOL Alert (USDT):</label>
-                <input type="number" id="sol-alert-high" placeholder="SOL high alert price" />
-                <input type="number" id="sol-alert-low" placeholder="SOL low alert price" />
-                <button type="button" onclick="setAlert('SOL')">Set Alert</button>
-            </div>
-            <div class="alert-item">
-                <label for="tao-alert-high">TAO Alert (USDT):</label>
-                <input type="number" id="tao-alert-high" placeholder="TAO high alert price" />
-                <input type="number" id="tao-alert-low" placeholder="TAO low alert price" />
-                <button type="button" onclick="setAlert('TAO')">Set Alert</button>
-            </div>
+            <!-- Dynamic alerts go here -->
         </form>
     </div>
 
     <div class="chart-container">
-        <h2>Crypto Price Charts</h2>
-    
-        <div class="crypto-chart" id="chart-BTC">
-            <h3>Bitcoin (BTC)</h3>
-            <label for="interval-BTC">Interval:</label>
-            <select id="interval-BTC" onchange="updateChart('BTC')">
-                <option value="1m">1 min</option>
-                <option value="30m">30 min</option>
-                <option value="1h">1 hour</option>
-                <option value="4h">4 hours</option>
-                <option value="1d">1 day</option>
-            </select>
-            <div id="plot-BTC" class="chart"></div>
-        </div>
-    
-        <div class="crypto-chart" id="chart-ETH">
-            <h3>Ethereum (ETH)</h3>
-            <label for="interval-ETH">Interval:</label>
-            <select id="interval-ETH" onchange="updateChart('ETH')">
-                <option value="1m">1 min</option>
-                <option value="30m">30 min</option>
-                <option value="1h">1 hour</option>
-                <option value="4h">4 hours</option>
-                <option value="1d">1 day</option>
-            </select>
-            <div id="plot-ETH" class="chart"></div>
-        </div>
-    
-        <div class="crypto-chart" id="chart-SOL">
-            <h3>Solana (SOL)</h3>
-            <label for="interval-SOL">Interval:</label>
-            <select id="interval-SOL" onchange="updateChart('SOL')">
-                <option value="1m">1 min</option>
-                <option value="30m">30 min</option>
-                <option value="1h">1 hour</option>
-                <option value="4h">4 hours</option>
-                <option value="1d">1 day</option>
-            </select>
-            <div id="plot-SOL" class="chart"></div>
-        </div>
-    
-        <div class="crypto-chart" id="chart-TAO">
-            <h3>TAO (TAO)</h3>
-            <label for="interval-TAO">Interval:</label>
-            <select id="interval-TAO" onchange="updateChart('TAO')">
-                <option value="1m">1 min</option>
-                <option value="30m">30 min</option>
-                <option value="1h">1 hour</option>
-                <option value="4h">4 hours</option>
-                <option value="1d">1 day</option>
-            </select>
-            <div id="plot-TAO" class="chart"></div>
-        </div>
+        <!-- Dynamic charts go here -->
     </div>
-    
 
     <script>
+        const cryptoList = ['BTC', 'ETH', 'SOL', 'TAO'];
+        const intervals = ['1m', '30m', '1h', '4h', '1d', '1w', '1M'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateAlertInputs();
+            generateCharts();
+            fetchPrices();
+            setInterval(fetchPrices, 5000);
+        });
+
+        function generateAlertInputs() {
+            const container = document.querySelector('.alert-container form');
+            container.innerHTML = '';
+
+            cryptoList.forEach(symbol => {
+                const div = document.createElement('div');
+                div.className = 'alert-item';
+                div.innerHTML = `
+                    <label for="${symbol.toLowerCase()}-alert-high">${symbol} Alert (USDT):</label>
+                    <input type="number" id="${symbol.toLowerCase()}-alert-high" placeholder="${symbol} high alert price" />
+                    <input type="number" id="${symbol.toLowerCase()}-alert-low" placeholder="${symbol} low alert price" />
+                    <button type="button" onclick="setAlert('${symbol}')">Set Alert</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function generateCharts() {
+            const chartContainer = document.querySelector('.chart-container');
+            chartContainer.innerHTML = '<h2>Crypto Price Charts</h2>';
+
+            cryptoList.forEach(symbol => {
+                const div = document.createElement('div');
+                div.className = 'crypto-chart';
+                div.id = `chart-${symbol}`;
+                const options = intervals.map(i => `<option value="${i}">${i}</option>`).join('');
+                div.innerHTML = `
+                    <h3>${symbol}</h3>
+                    <label for="interval-${symbol}">Interval:</label>
+                    <select id="interval-${symbol}" onchange="updateChart('${symbol}')">${options}</select>
+                    <div id="plot-${symbol}" class="chart"></div>
+                `;
+                chartContainer.appendChild(div);
+                updateChart(symbol);
+            });
+
+            setInterval(() => {
+                cryptoList.forEach(updateChart);
+            }, 5000);
+        }
+
         async function fetchPrices() {
             const response = await fetch('/prices');
             const prices = await response.json();
             const tableBody = document.getElementById('crypto-table-body');
-            tableBody.innerHTML = ''; // Clear current table rows
-            Object.keys(prices).forEach(symbol => {
+            tableBody.innerHTML = '';
+
+            Object.entries(prices).forEach(([symbol, price]) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${symbol}</td>
-                    <td class="crypto-price" id="${symbol.toLowerCase()}-price">${prices[symbol].toFixed(2)}</td>
+                    <td class="crypto-price" id="${symbol.toLowerCase()}-price">${price.toFixed(2)}</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -211,12 +187,12 @@
         async function setAlert(symbol) {
             const highPrice = document.getElementById(`${symbol.toLowerCase()}-alert-high`).value;
             const lowPrice = document.getElementById(`${symbol.toLowerCase()}-alert-low`).value;
-            
+
             const alerts = {
                 [`${symbol}_high`]: highPrice,
                 [`${symbol}_low`]: lowPrice
             };
-            
+
             await fetch('/set-alerts', {
                 method: 'POST',
                 body: JSON.stringify(alerts),
@@ -228,14 +204,11 @@
 
         async function updateChart(symbol) {
             const interval = document.getElementById(`interval-${symbol}`).value;
-
-            // Récupérer l'état actuel du zoom (horizontal et vertical)
             const chartDiv = document.getElementById(`plot-${symbol}`);
             const currentLayout = chartDiv.layout || {};
 
             const response = await fetch(`/chart-data/${symbol}/${interval}`);
             const data = await response.json();
-
             if (!data.times) return;
 
             const times = data.times.map(t => new Date(t));
@@ -249,14 +222,14 @@
                 name: symbol,
                 increasing: { line: { color: 'green' } },
                 decreasing: { line: { color: 'red' } },
-                hovertemplate: 
-                    `<b>Date: %{x|%Y-%m-%d %H:%M:%S}</b><br>
+                hovertemplate: `
+                    <b>Date: %{x|%Y-%m-%d %H:%M:%S}</b><br>
                     Open: %{open}<br>
                     High: %{high}<br>
                     Low: %{low}<br>
                     Close: %{close}<br>
-                    Price: %{y}<br>`, // Affiche le prix au survol
-                hovermode: 'closest', // Permet d'afficher un tooltip au point le plus proche
+                    Price: %{y}<br>
+                `
             };
 
             const layout = {
@@ -264,22 +237,17 @@
                 xaxis: {
                     title: 'Time',
                     rangeslider: { visible: true },
-                    range: currentLayout.xaxis ? currentLayout.xaxis.range : undefined, // Conserve le zoom horizontal
+                    range: currentLayout.xaxis?.range
                 },
                 yaxis: {
                     title: 'Price (USDT)',
-                    fixedrange: false, // Permet le zoom vertical
-                    range: currentLayout.yaxis ? currentLayout.yaxis.range : undefined // Conserve le zoom vertical
+                    fixedrange: false,
+                    range: currentLayout.yaxis?.range
                 }
             };
+
             Plotly.react(chartDiv, [trace], layout);
         }
-
-        setInterval(fetchPrices, 5000); // Update prices every 5 seconds
-        fetchPrices(); // Fetch prices immediately when the page loads
-        
-        setInterval(fetchChartData, 5000); // Update chart data every 5 seconds
-        fetchChartData(); // Fetch chart data immediately when the page loads
-   </script>
+    </script>
 </body>
 </html>
