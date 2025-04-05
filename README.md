@@ -26,20 +26,20 @@
 </p> <br>
 
 <p align="center">
-  <img align="left" width=45% src = "https://github.com/user-attachments/assets/81d09197-5c0a-40b8-9f63-7efe6d654280"/>
+  <img align="center" width=45% src = "https://github.com/user-attachments/assets/81d09197-5c0a-40b8-9f63-7efe6d654280"/>
 </p>
 
 <p align="center">
-  <img align="right" width=40% src = "https://github.com/user-attachments/assets/5b7b90ac-f13a-4f7f-ad90-ae70f683b278"/>
+  <img align="center" width=40% src = "https://github.com/user-attachments/assets/5b7b90ac-f13a-4f7f-ad90-ae70f683b278"/>
 </p>
 <br>
 
 ### step 4 :
-<p align="left">
-  <img align="left" width=50% src = "https://github.com/user-attachments/assets/57aba833-a788-4113-ab44-928edcaabf64"/>
+<p align="center">
+  <img align="center" width=50% src = "https://github.com/user-attachments/assets/57aba833-a788-4113-ab44-928edcaabf64"/>
 </p>
 
-<p align="right">
-  <img align="left" width=50% src = "https://github.com/user-attachments/assets/0dea9266-d83e-45e7-9ab7-8ed37c5abcbc"/>
+<p align="center">
+  <img align="center" width=50% src = "https://github.com/user-attachments/assets/0dea9266-d83e-45e7-9ab7-8ed37c5abcbc"/>
 </p>
 
