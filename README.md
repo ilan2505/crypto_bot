@@ -66,7 +66,7 @@ I reproduced a crypto exchange where the idea was to add as many functions as po
   <img align="center" width=90% src = "https://github.com/user-attachments/assets/73fd57be-0ee3-4f5c-b91d-6fd75dedda22"/>
 </p>
 
-### Alerts and Order book :
+### Alerts and Live Order book :
 <p align="center">
   <img align="center" width=90% src = "https://github.com/user-attachments/assets/53f765f0-1cbc-48aa-adc3-9c277eee7816"/>
 </p>
