@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wallet</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    /* Base styles for light mode */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      background-color: #f4f4f9;
+      color: #000;
+      min-height: 100vh;
+      padding-bottom: 20px;
+      position: relative;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    /* Dark mode styles */
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 8px 12px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+    h1 {
+      color: #007BFF;
+      margin: 20px 0;
+    }
+    .wallet-info {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .chart-container {
+      width: 80%;
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    #breakdown-chart, #history-chart {
+      margin: auto;
+    }
+    .period-selector {
+      margin: 10px 0;
+      text-align: center;
+    }
+    /* Section to update wallet holdings */
+    .update-holdings {
+      width: 80%;
+      background: #fff;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .update-holdings form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .update-holdings label {
+      margin: 10px;
+    }
+    .update-holdings input {
+      padding: 5px;
+      margin: 10px;
+      width: 100px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .update-holdings button {
+      padding: 5px 10px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .update-holdings button:hover {
+      background-color: #0056b3;
+    }
+    /* Toggle switch styles for dark/light mode */
+    .toggle-switch {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #007BFF;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+  </style>
+  <script>
+    // On page load, check the user's theme preference and apply dark mode if set
+    if (localStorage.getItem('theme') === 'dark') {
+      document.addEventListener("DOMContentLoaded", function() {
+        document.body.classList.add('dark-mode');
+      });
+    }
+  </script>
+</head>
+<body>
+  <!-- Back button -->
+  <button class="back-button" onclick="window.history.back()">Back</button>
+  
+  <!-- Dark mode toggle switch -->
+  <label class="toggle-switch">
+    <input type="checkbox" id="theme-toggle">
+    <span class="slider"></span>
+  </label>
+  
+  <h1>My Wallet</h1>
+  <div class="wallet-info">
+    <h2>Total Wallet Value: <span id="wallet-total">0 USDT</span></h2>
+  </div>
+
+  <div class="chart-container">
+    <h2>Crypto Breakdown</h2>
+    <div id="breakdown-chart" style="width:600px; height:400px;"></div>
+  </div>
+
+  <!-- Section to update wallet holdings manually (placé ici en premier) -->
+  <div class="update-holdings">
+    <h2>Update My Holdings</h2>
+    <form id="holdings-form">
+      <!-- Fields will be generated once based on the favorites list -->
+    </form>
+    <button onclick="saveHoldings()">Save</button>
+  </div>
+  
+  <!-- Graph Wallet History (placé après Update My Holdings) -->
+  <div class="chart-container">
+    <h2>Wallet History</h2>
+    <!-- Period selector -->
+    <div class="period-selector">
+      <label for="period-select">Period:</label>
+      <select id="period-select" onchange="updateHistoryChart()">
+        <option value="live">Live</option>
+        <option value="day">Day</option>
+        <option value="week">Week</option>
+        <option value="month">Month</option>
+      </select>
+    </div>
+    <div id="history-chart" style="width:600px; height:400px;"></div>
+  </div>
+
+  <script>
+    // Set the theme toggle switch state based on localStorage
+    const toggleSwitch = document.getElementById('theme-toggle');
+    if (localStorage.getItem('theme') === 'dark') {
+      toggleSwitch.checked = true;
+    }
+    toggleSwitch.addEventListener('change', function() {
+      if (this.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+    // Retrieves the list of favorites from localStorage or initializes with default values
+    function getFavorites() {
+      let favorites = localStorage.getItem('favoriteCryptos');
+      if (!favorites) {
+        favorites = JSON.stringify(["BTC", "ETH", "SOL", "TAO"]);
+        localStorage.setItem('favoriteCryptos', favorites);
+      }
+      return JSON.parse(favorites);
+    }
+    
+    // Global variable to store full history data returned by /wallet-data
+    let globalHistory = { times: [], values: [] };
+
+    // Fetch and update the wallet charts
+    function fetchWalletData() {
+      fetch('/wallet-data')
+        .then(response => response.json())
+        .then(data => {
+          const total = data.total_wallet_value;
+          document.getElementById('wallet-total').innerText = total.toFixed(2) + " USDT";
+
+          // Pie chart for crypto breakdown
+          const breakdown = data.breakdown;
+          const symbols = Object.keys(breakdown);
+          const percentages = symbols.map(sym => breakdown[sym]);
+          const pieData = [{
+            values: percentages,
+            labels: symbols,
+            type: 'pie',
+            textinfo: 'label+percent',
+            insidetextorientation: 'radial'
+          }];
+          const pieLayout = { title: 'Breakdown (%)' };
+          Plotly.newPlot('breakdown-chart', pieData, pieLayout);
+
+          // Update history data
+          globalHistory = data.history;
+          updateHistoryChart();
+        })
+        .catch(error => console.error("Error while fetching wallet data:", error));
+    }
+
+    // Filters the history based on the selected period
+    function filterHistory(times, values, period) {
+      const now = new Date();
+      let threshold;
+      if (period === "day") {
+        threshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      } else if (period === "week") {
+        threshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      } else if (period === "month") {
+        threshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      } else {
+        return { filteredTimes: times, filteredValues: values };
+      }
+      const filteredTimes = [];
+      const filteredValues = [];
+      for (let i = 0; i < times.length; i++) {
+        if (times[i] >= threshold) {
+          filteredTimes.push(times[i]);
+          filteredValues.push(values[i]);
+        }
+      }
+      return { filteredTimes: filteredTimes.length ? filteredTimes : times, filteredValues: filteredValues.length ? filteredValues : values };
+    }
+
+    // Updates the history chart based on the selected period
+    function updateHistoryChart() {
+      const times = globalHistory.times.map(t => new Date(t * 1000));
+      const values = globalHistory.values;
+      const period = document.getElementById('period-select').value;
+      const { filteredTimes, filteredValues } = filterHistory(times, values, period);
+      
+      const historyData = [{
+        x: filteredTimes,
+        y: filteredValues,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Total Value'
+      }];
+      
+      const historyLayout = {
+        title: 'Wallet History',
+        xaxis: { title: 'Time' },
+        yaxis: { title: 'Total Value (USDT)' }
+      };
+      
+      Plotly.newPlot('history-chart', historyData, historyLayout);
+    }
+
+    // Generates the form for updating wallet holdings based on the favorites list
+    function fetchWalletHoldings() {
+      fetch('/wallet-holdings')
+        .then(response => response.json())
+        .then(data => {
+          const favorites = getFavorites();
+          const form = document.getElementById('holdings-form');
+          // Generate the form only once
+          if (form.children.length === 0) {
+            favorites.forEach(symbol => {
+              const label = document.createElement('label');
+              label.innerText = symbol + ": ";
+              const input = document.createElement('input');
+              input.type = "number";
+              input.step = "any";
+              input.id = "holdings-" + symbol;
+              input.value = data[symbol] !== undefined ? data[symbol] : 0;
+              form.appendChild(label);
+              form.appendChild(input);
+            });
+          }
+        })
+        .catch(error => console.error("Error while loading holdings:", error));
+    }
+
+    // Sends the new values to the server to update wallet holdings
+    function saveHoldings() {
+      const form = document.getElementById('holdings-form');
+      const inputs = form.querySelectorAll('input');
+      const newHoldings = {};
+      inputs.forEach(input => {
+        const symbol = input.id.replace("holdings-", "");
+        newHoldings[symbol] = parseFloat(input.value) || 0;
+      });
+      fetch('/update-wallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newHoldings)
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert("Wallet updated successfully!");
+        // Refresh charts after saving
+        fetchWalletData();
+      })
+      .catch(error => console.error("Error while saving holdings:", error));
+    }
+
+    // Initial calls
+    fetchWalletData();
+    fetchWalletHoldings();
+    // Periodically update charts (but not the form)
+    setInterval(fetchWalletData, 5000);
+  </script>
+</body>
+</html>

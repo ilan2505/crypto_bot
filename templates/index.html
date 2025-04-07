@@ -1,253 +1,447 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Prices</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            background-color: #f4f4f9;
-            min-height: 100vh;
-            overflow-y: auto;
-            padding-bottom: 20px;
-        }
-        table {
-            width: 50%;
-            border-collapse: collapse;
-            text-align: center;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #007BFF;
-            color: #fff;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #e9e9e9;
-        }
-        h1 {
-            color: #007BFF;
-            margin-bottom: 20px;
-        }
-        .crypto-price {
-            color: #333;
-        }
-        .alert-container {
-            width: 60%;
-            margin-top: 20px;
-        }
-        .alert-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .alert-item label {
-            margin-right: 10px;
-        }
-        .alert-item input {
-            width: 45%;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            margin-right: 10px;
-        }
-        button {
-            padding: 5px 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .chart-container {
-            width: 80%;
-            margin-top: 20px;
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .chart {
-            width: 100%;
-            height: 400px;
-            margin-bottom: 30px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Crypto Prices - Favorites</title>
+  
+  <!-- Inclusion of ApexCharts for the gauge -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <style>
+    /* Light mode by default */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f9;
+      color: #000;
+      margin: 0;
+      padding: 20px;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    /* Dark mode */
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    h1 {
+      color: #007BFF;
+    }
+    /* Navigation buttons */
+    .nav-buttons {
+      margin: 20px 0;
+    }
+    .nav-buttons button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .nav-buttons button:hover {
+      background-color: #0056b3;
+    }
+    /* Cryptocurrency table */
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 60%;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #007BFF;
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    button {
+      padding: 5px 10px;
+      background-color: #007BFF;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      margin: 2px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #add-form {
+      margin: 20px;
+    }
+    input[type="text"] {
+      padding: 5px;
+      width: 150px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    /* Toggle switch for dark mode */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+      margin: 20px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #007BFF;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    /* Container for the Fear & Greed gauge */
+    #fearGreedGauge {
+      max-width: 500px;
+      margin: 40px auto;
+    }
+    /* Live News Section */
+    .news-container {
+      width: 80%;
+      margin: 40px auto;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+    .news-container h2 {
+      text-align: center;
+      color: #007BFF;
+    }
+    #news-list {
+      list-style: none;
+      padding: 0;
+    }
+    #news-list li {
+      margin: 10px 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+    #news-list li a {
+      text-decoration: none;
+      color: #007BFF;
+    }
+  </style>
+
+  <script>
+    // Apply dark mode if needed on load
+    if (localStorage.getItem('theme') === 'dark') {
+      document.addEventListener("DOMContentLoaded", function() {
+        document.body.classList.add('dark-mode');
+      });
+    }
+  </script>
 </head>
 <body>
-    <h1>Real-Time Crypto Prices</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Cryptocurrency</th>
-                <th>Price (USDT)</th>
-            </tr>
-        </thead>
-        <tbody id="crypto-table-body">
-            <!-- Populated dynamically -->
-        </tbody>
-    </table>
+  <h1>Crypto exchange</h1>
 
-    <div class="alert-container">
-        <h3>Set Price Alerts</h3>
-        <form id="alert-form">
-            <!-- Dynamic alerts go here -->
-        </form>
-    </div>
+  <!-- Toggle switch for dark/light mode -->
+  <label class="toggle-switch">
+    <input type="checkbox" id="theme-toggle">
+    <span class="slider"></span>
+  </label>
 
-    <div class="chart-container">
-        <!-- Dynamic charts go here -->
-    </div>
+  <div class="nav-buttons">
+    <button onclick="window.location.href='/wallet'">My Wallet</button>
+    <button onclick="window.location.href='/market'">Market</button>
+  </div>
 
-    <script>
-        const cryptoList = ['BTC', 'ETH', 'SOL', 'TAO'];
-        const intervals = ['1m', '30m', '1h', '4h', '1d', '1w', '1M'];
+  <div id="add-form">
+    <input type="text" id="new-crypto" placeholder="Symbol (e.g., BTC)" />
+    <button onclick="addFavorite()">Add</button>
+  </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            generateAlertInputs();
-            generateCharts();
-            fetchPrices();
-            setInterval(fetchPrices, 5000);
+  <!-- Favorites table -->
+  <table id="favorites-table">
+    <thead>
+      <tr>
+        <th>Cryptocurrency</th>
+        <th>Price (USDT)</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- The table will be rebuilt in JavaScript -->
+    </tbody>
+  </table>
+
+  <!-- Fear & Greed Gauge -->
+  <div>
+    <h2>Fear & Greed Index</h2>
+    <div id="fearGreedGauge"></div>
+  </div>
+
+  <!-- Live News Section -->
+  <div class="news-container">
+    <h2>Live News</h2>
+    <ul id="news-list">
+      <li>Loading news...</li>
+    </ul>
+  </div>
+
+  <script>
+    // --------------------------
+    // FAVORITES TABLE MANAGEMENT
+    // --------------------------
+    function getFavorites() {
+      let favorites = localStorage.getItem('favoriteCryptos');
+      if (!favorites) {
+        favorites = JSON.stringify(["BTC", "ETH", "SOL", "TAO"]);
+        localStorage.setItem('favoriteCryptos', favorites);
+      }
+      return JSON.parse(favorites);
+    }
+
+    function saveFavorites(favorites) {
+      localStorage.setItem('favoriteCryptos', JSON.stringify(favorites));
+    }
+
+    function addFavorite() {
+      const newCrypto = document.getElementById('new-crypto').value.trim().toUpperCase();
+      if (newCrypto === "") {
+        alert("Please enter a cryptocurrency symbol.");
+        return;
+      }
+      let favorites = getFavorites();
+      if (!favorites.includes(newCrypto)) {
+        favorites.push(newCrypto);
+        saveFavorites(favorites);
+        document.getElementById('new-crypto').value = "";
+        updateFavoritesTable();
+      } else {
+        alert("This cryptocurrency is already in your favorites.");
+      }
+    }
+
+    function removeFavorite(symbol) {
+      let favorites = getFavorites();
+      favorites = favorites.filter(item => item !== symbol);
+      saveFavorites(favorites);
+      updateFavoritesTable();
+    }
+
+    function moveToTop(symbol) {
+      let favorites = getFavorites();
+      const index = favorites.indexOf(symbol);
+      if (index > 0) {
+        favorites.splice(index, 1);
+        favorites.unshift(symbol);
+        saveFavorites(favorites);
+        updateFavoritesTable();
+      }
+    }
+
+    let previousPrices = {};
+
+    function updateFavoritesTable() {
+      const favorites = getFavorites();
+      const tbody = document.getElementById('favorites-table').querySelector('tbody');
+      tbody.innerHTML = "";
+      favorites.forEach(symbol => {
+        const row = document.createElement('tr');
+        row.id = "row-" + symbol;
+        
+        const symbolCell = document.createElement('td');
+        symbolCell.innerText = symbol;
+        row.appendChild(symbolCell);
+        
+        const priceCell = document.createElement('td');
+        priceCell.id = "price-" + symbol;
+        priceCell.innerText = (previousPrices[symbol] === undefined) ? "Loading..." : previousPrices[symbol].toFixed(2);
+        row.appendChild(priceCell);
+        
+        const actionsCell = document.createElement('td');
+        const upButton = document.createElement('button');
+        upButton.innerText = "Up";
+        upButton.onclick = () => moveToTop(symbol);
+        const deleteButton = document.createElement('button');
+        deleteButton.innerText = "Delete";
+        deleteButton.onclick = () => removeFavorite(symbol);
+        actionsCell.appendChild(upButton);
+        actionsCell.appendChild(deleteButton);
+        row.appendChild(actionsCell);
+        
+        tbody.appendChild(row);
+        
+        // Price update
+        fetch(`/price/${symbol}`)
+          .then(response => {
+            if (!response.ok) throw new Error("Error for " + symbol);
+            return response.json();
+          })
+          .then(data => {
+            const newPrice = data[symbol] ? data[symbol] : 0;
+            let priceCell = document.getElementById("price-" + symbol);
+            priceCell.innerText = newPrice.toFixed(2);
+            if (previousPrices[symbol] !== undefined) {
+              if (newPrice > previousPrices[symbol]) {
+                priceCell.style.color = "lightgreen";
+              } else if (newPrice < previousPrices[symbol]) {
+                priceCell.style.color = "red";
+              } else {
+                priceCell.style.color = "black";
+              }
+            } else {
+              priceCell.style.color = "black";
+            }
+            previousPrices[symbol] = newPrice;
+          })
+          .catch(error => {
+            console.error("Error fetching price for " + symbol, error);
+            let priceCell = document.getElementById("price-" + symbol);
+            priceCell.innerText = "N/A";
+          });
+      });
+    }
+
+    // Initial update and refresh every 5 seconds
+    updateFavoritesTable();
+    setInterval(updateFavoritesTable, 5000);
+    
+    // --------------------------
+    // DARK MODE MANAGEMENT
+    // --------------------------
+    document.addEventListener("DOMContentLoaded", function() {
+      const toggleSwitch = document.getElementById('theme-toggle');
+      if (localStorage.getItem('theme') === 'dark') {
+        toggleSwitch.checked = true;
+      }
+      toggleSwitch.addEventListener('change', function() {
+        if (this.checked) {
+          document.body.classList.add('dark-mode');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          document.body.classList.remove('dark-mode');
+          localStorage.setItem('theme', 'light');
+        }
+      });
+    });
+
+    // --------------------------
+    // FEAR & GREED GAUGE WITH APEXCHARTS
+    // --------------------------
+    let gaugeOptions = {
+      series: [0],
+      chart: {
+        height: 300,
+        type: 'radialBar'
+      },
+      plotOptions: {
+        radialBar: {
+          startAngle: -135,
+          endAngle: 135,
+          hollow: {
+            size: '70%'
+          },
+          track: {
+            background: '#f2f2f2'
+          },
+          dataLabels: {
+            name: {
+              show: false
+            },
+            value: {
+              fontSize: '36px',
+              show: true
+            }
+          }
+        }
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'light',
+          type: 'horizontal',
+          gradientToColors: ['#00b300'],
+          stops: [0, 100]
+        },
+        colors: ['#ff0000']
+      },
+      labels: ['Fear & Greed'],
+      yaxis: {
+        min: 0,
+        max: 100
+      }
+    };
+
+    let fearGreedChart = new ApexCharts(document.querySelector("#fearGreedGauge"), gaugeOptions);
+    fearGreedChart.render();
+
+    function updateFearGreedGauge() {
+      fetch('/fear-greed')
+        .then(response => response.json())
+        .then(data => {
+          const indexValue = data.fear_greed || 0;
+          fearGreedChart.updateSeries([indexValue]);
+        })
+        .catch(err => console.error("Error fetching Fear & Greed data", err));
+    }
+
+    updateFearGreedGauge();
+    setInterval(updateFearGreedGauge, 5000);
+
+    // --------------------------
+    // LIVE NEWS SECTION
+    // --------------------------
+    function updateNews() {
+      fetch('/news')
+        .then(response => response.json())
+        .then(data => {
+          const newsList = document.getElementById('news-list');
+          newsList.innerHTML = "";
+          data.articles.forEach(article => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = article.url;
+            a.target = '_blank';
+            a.innerText = article.title;
+            li.appendChild(a);
+            newsList.appendChild(li);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching news', error);
+          document.getElementById('news-list').innerHTML = '<li>Error fetching news.</li>';
         });
-
-        function generateAlertInputs() {
-            const container = document.querySelector('.alert-container form');
-            container.innerHTML = '';
-
-            cryptoList.forEach(symbol => {
-                const div = document.createElement('div');
-                div.className = 'alert-item';
-                div.innerHTML = `
-                    <label for="${symbol.toLowerCase()}-alert-high">${symbol} Alert (USDT):</label>
-                    <input type="number" id="${symbol.toLowerCase()}-alert-high" placeholder="${symbol} high alert price" />
-                    <input type="number" id="${symbol.toLowerCase()}-alert-low" placeholder="${symbol} low alert price" />
-                    <button type="button" onclick="setAlert('${symbol}')">Set Alert</button>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function generateCharts() {
-            const chartContainer = document.querySelector('.chart-container');
-            chartContainer.innerHTML = '<h2>Crypto Price Charts</h2>';
-
-            cryptoList.forEach(symbol => {
-                const div = document.createElement('div');
-                div.className = 'crypto-chart';
-                div.id = `chart-${symbol}`;
-                const options = intervals.map(i => `<option value="${i}">${i}</option>`).join('');
-                div.innerHTML = `
-                    <h3>${symbol}</h3>
-                    <label for="interval-${symbol}">Interval:</label>
-                    <select id="interval-${symbol}" onchange="updateChart('${symbol}')">${options}</select>
-                    <div id="plot-${symbol}" class="chart"></div>
-                `;
-                chartContainer.appendChild(div);
-                updateChart(symbol);
-            });
-
-            setInterval(() => {
-                cryptoList.forEach(updateChart);
-            }, 5000);
-        }
-
-        async function fetchPrices() {
-            const response = await fetch('/prices');
-            const prices = await response.json();
-            const tableBody = document.getElementById('crypto-table-body');
-            tableBody.innerHTML = '';
-
-            Object.entries(prices).forEach(([symbol, price]) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${symbol}</td>
-                    <td class="crypto-price" id="${symbol.toLowerCase()}-price">${price.toFixed(2)}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        async function setAlert(symbol) {
-            const highPrice = document.getElementById(`${symbol.toLowerCase()}-alert-high`).value;
-            const lowPrice = document.getElementById(`${symbol.toLowerCase()}-alert-low`).value;
-
-            const alerts = {
-                [`${symbol}_high`]: highPrice,
-                [`${symbol}_low`]: lowPrice
-            };
-
-            await fetch('/set-alerts', {
-                method: 'POST',
-                body: JSON.stringify(alerts),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-        }
-
-        async function updateChart(symbol) {
-            const interval = document.getElementById(`interval-${symbol}`).value;
-            const chartDiv = document.getElementById(`plot-${symbol}`);
-            const currentLayout = chartDiv.layout || {};
-
-            const response = await fetch(`/chart-data/${symbol}/${interval}`);
-            const data = await response.json();
-            if (!data.times) return;
-
-            const times = data.times.map(t => new Date(t));
-            const trace = {
-                x: times,
-                open: data.opens,
-                high: data.highs,
-                low: data.lows,
-                close: data.closes,
-                type: 'candlestick',
-                name: symbol,
-                increasing: { line: { color: 'green' } },
-                decreasing: { line: { color: 'red' } },
-                hovertemplate: `
-                    <b>Date: %{x|%Y-%m-%d %H:%M:%S}</b><br>
-                    Open: %{open}<br>
-                    High: %{high}<br>
-                    Low: %{low}<br>
-                    Close: %{close}<br>
-                    Price: %{y}<br>
-                `
-            };
-
-            const layout = {
-                title: `${symbol} Price Chart`,
-                xaxis: {
-                    title: 'Time',
-                    rangeslider: { visible: true },
-                    range: currentLayout.xaxis?.range
-                },
-                yaxis: {
-                    title: 'Price (USDT)',
-                    fixedrange: false,
-                    range: currentLayout.yaxis?.range
-                }
-            };
-
-            Plotly.react(chartDiv, [trace], layout);
-        }
-    </script>
+    }
+    updateNews();
+    // Refresh news every minute (60000 ms)
+    setInterval(updateNews, 60000);
+  </script>
 </body>
 </html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ symbol }} Details</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    /* Base styles for light mode */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #000;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    /* Dark mode styles */
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    .back-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 8px 12px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+    /* Toggle switch styles */
+    .toggle-switch {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #007BFF;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    h1 {
+      color: #007BFF;
+      margin-bottom: 10px;
+    }
+    #live-price {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .chart-container {
+      margin: 20px auto;
+      width: 80%;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    /* Order book table styling */
+    .order-book-table {
+      width: 100%;
+      font-size: 0.9em;
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    .order-book-table th, .order-book-table td {
+      border: 1px solid #ddd;
+      padding: 5px;
+      text-align: center;
+    }
+    .order-book-table th {
+      background-color: #007BFF;
+      color: #fff;
+    }
+    /* Container to display two tables side by side */
+    .order-book-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+    }
+    .order-book-container > div {
+      flex: 1;
+      padding: 10px;
+    }
+    /* Alert section styles */
+    .alert-section {
+      margin: 20px auto;
+      width: 80%;
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .alert-section form {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .alert-section input[type="number"] {
+      padding: 5px;
+      margin: 5px;
+      width: 120px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .alert-section button {
+      padding: 5px 10px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .alert-section button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script>
+    // On page load, apply dark mode if needed
+    if (localStorage.getItem('theme') === 'dark') {
+      document.addEventListener("DOMContentLoaded", function() {
+        document.body.classList.add('dark-mode');
+      });
+    }
+  </script>
+</head>
+<body>
+  <!-- Back button -->
+  <button class="back-button" onclick="window.history.back()">Back</button>
+  
+  <!-- Dark mode toggle switch -->
+  <label class="toggle-switch">
+    <input type="checkbox" id="theme-toggle">
+    <span class="slider"></span>
+  </label>
+  
+  <h1>{{ symbol }}</h1>
+  <div id="live-price">Loading price...</div>
+  
+  <!-- Price Chart Section -->
+  <div class="chart-container">
+    <label for="interval-select">Interval:</label>
+    <select id="interval-select" onchange="updateInterval()">
+      <option value="1m">1m</option>
+      <option value="30m">30m</option>
+      <option value="1h" selected>1h</option>
+      <option value="4h">4h</option>
+      <option value="1d">1d</option>
+      <option value="1w">1w</option>
+      <option value="1M">1M</option>
+    </select>
+    <div id="crypto-chart" style="width:100%; height:400px;"></div>
+  </div>
+
+  <!-- Alert Section -->
+  <div class="alert-section">
+    <h2>Set Alert for {{ symbol }}</h2>
+    <form id="alert-form">
+      <input type="number" id="{{ symbol }}-alert-high" placeholder="High Alert (USDT)">
+      <input type="number" id="{{ symbol }}-alert-low" placeholder="Low Alert (USDT)">
+      <button type="button" onclick="setAlert('{{ symbol }}')">Set Alert</button>
+      <button type="button" onclick="clearAlert('{{ symbol }}')">Clean</button>
+    </form>
+  </div>
+  
+  <!-- Order Book Section: Two separate tables side by side -->
+  <div class="chart-container" id="order-book-container">
+    <h2 class="section-title">Order Book</h2>
+    <div class="order-book-container" id="order-book">
+      <!-- Buy and Sell orders tables will be loaded here -->
+    </div>
+  </div>
+  
+  <script>
+    // Dark mode toggle functionality
+    const toggleSwitch = document.getElementById('theme-toggle');
+    if (localStorage.getItem('theme') === 'dark') {
+      toggleSwitch.checked = true;
+    }
+    toggleSwitch.addEventListener('change', function() {
+      if (this.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+    const symbol = "{{ symbol }}";
+    let currentInterval = '1h';
+
+    // Fetch and update the chart data
+    function fetchChartData() {
+      fetch(`/chart-data/${symbol}/${currentInterval}`)
+        .then(response => response.json())
+        .then(data => {
+          if (!data.times) return;
+          const times = data.times.map(t => new Date(t));
+          const newTrace = {
+            x: times,
+            open: data.opens,
+            high: data.highs,
+            low: data.lows,
+            close: data.closes,
+            type: 'candlestick',
+            name: symbol,
+            increasing: { line: { color: 'green' } },
+            decreasing: { line: { color: 'red' } }
+          };
+          const chartDiv = document.getElementById('crypto-chart');
+          let preservedRange = null;
+          if (chartDiv && chartDiv.layout && chartDiv.layout.xaxis && chartDiv.layout.xaxis.range) {
+            preservedRange = chartDiv.layout.xaxis.range;
+          }
+          const newLayout = {
+            title: `${symbol} Price Chart (${currentInterval})`,
+            xaxis: { title: 'Time' },
+            yaxis: { title: 'Price (USDT)' }
+          };
+          if (preservedRange) {
+            newLayout.xaxis.range = preservedRange;
+          }
+          Plotly.react('crypto-chart', [newTrace], newLayout);
+        })
+        .catch(error => console.error("Error fetching chart data:", error));
+    }
+
+    // Update the selected interval and reload the chart
+    function updateInterval() {
+      currentInterval = document.getElementById("interval-select").value;
+      fetchChartData();
+    }
+
+    // Set an alert for the cryptocurrency
+    function setAlert(sym) {
+      const high = document.getElementById(`${sym}-alert-high`).value;
+      const low = document.getElementById(`${sym}-alert-low`).value;
+      const alertData = {};
+      alertData[`${sym}_high`] = high;
+      alertData[`${sym}_low`] = low;
+      fetch('/set-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(alertData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert("Alert set successfully!");
+      })
+      .catch(error => console.error("Error setting alert:", error));
+    }
+
+    // Load current alerts and populate the alert form
+    function loadAlerts() {
+      fetch('/get-alerts')
+        .then(response => response.json())
+        .then(data => {
+          const highValue = data.alerts_high[symbol];
+          const lowValue = data.alerts_low[symbol];
+          if (highValue !== null && highValue !== undefined) {
+            document.getElementById(`${symbol}-alert-high`).value = highValue;
+          }
+          if (lowValue !== null && lowValue !== undefined) {
+            document.getElementById(`${symbol}-alert-low`).value = lowValue;
+          }
+        })
+        .catch(error => console.error("Error loading alerts:", error));
+    }
+
+    // Clear alerts for the cryptocurrency
+    function clearAlert(sym) {
+      fetch('/clear-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbol: sym })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          alert("Alerts cleared successfully!");
+          document.getElementById(`${sym}-alert-high`).value = "";
+          document.getElementById(`${sym}-alert-low`).value = "";
+        }
+      })
+      .catch(error => console.error("Error clearing alerts:", error));
+    }
+
+    // Fetch and display the live price of the cryptocurrency using the /price/<symbol> endpoint
+    function fetchLivePrice() {
+      fetch(`/price/${symbol}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data && data[symbol]) {
+            document.getElementById('live-price').innerText = `${symbol} Price: ${data[symbol].toFixed(2)} USDT`;
+          }
+        })
+        .catch(error => console.error("Error fetching live price:", error));
+    }
+
+    // Fetch and display the order book in two separate tables (Buy orders left, Sell orders right)
+    function fetchOrderBook() {
+      fetch(`https://api.binance.com/api/v3/depth?symbol=${symbol}USDT&limit=10`)
+        .then(response => response.json())
+        .then(data => {
+          const bids = data.bids; // Buy orders
+          const asks = data.asks; // Sell orders
+
+          let buyTableHTML = `<table class="order-book-table">
+            <thead>
+              <tr>
+                <th colspan="2">Buy Orders</th>
+              </tr>
+              <tr>
+                <th>Price (USDT)</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>`;
+          for (let i = 0; i < bids.length; i++) {
+            let bidPrice = parseFloat(bids[i][0]).toFixed(2);
+            let bidQty = bids[i][1];
+            buyTableHTML += `<tr>
+              <td style="color: black;">${bidPrice}</td>
+              <td style="color: lightgreen;">${bidQty}</td>
+            </tr>`;
+          }
+          buyTableHTML += `</tbody></table>`;
+
+          let sellTableHTML = `<table class="order-book-table">
+            <thead>
+              <tr>
+                <th colspan="2">Sell Orders</th>
+              </tr>
+              <tr>
+                <th>Price (USDT)</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody>`;
+          for (let i = 0; i < asks.length; i++) {
+            let askPrice = parseFloat(asks[i][0]).toFixed(2);
+            let askQty = asks[i][1];
+            sellTableHTML += `<tr>
+              <td style="color: black;">${askPrice}</td>
+              <td style="color: red;">${askQty}</td>
+            </tr>`;
+          }
+          sellTableHTML += `</tbody></table>`;
+
+          // Place the two tables side by side in the order-book container
+          document.getElementById('order-book').innerHTML = `
+            <div style="flex:1; padding:10px;">${buyTableHTML}</div>
+            <div style="flex:1; padding:10px;">${sellTableHTML}</div>
+          `;
+        })
+        .catch(error => console.error("Error fetching order book:", error));
+    }
+
+    // Initial loading and periodic updates
+    fetchChartData();
+    loadAlerts();
+    fetchLivePrice();
+    fetchOrderBook();
+    setInterval(fetchChartData, 5000);
+    setInterval(fetchLivePrice, 5000);
+    setInterval(fetchOrderBook, 5000);
+  </script>
+</body>
+</html>
