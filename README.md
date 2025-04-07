@@ -1,45 +1,75 @@
-# Crypto bot
-# Steps
-* 1 - get prices of different cryptos using binance api (web)
-* 2 - send alerts to a telegram bot
-* 3 - web alerts button to send directly on telegram + message to telegram
-* 4 - Cryptos charts with plotly
+# Crypto exchange
+I reproduced a crypto exchange where the idea was to add as many functions as possible without having to leave the exchange, I have not finished yet but as future work to do i could add a tab with what crypto influencers say live, possibility of knowing how much it makes me in any currency in the world, add other functionalities in the graphs like averages (MM7, 30, 100...) and also thresholds.
+
+# what I was able to do :
+* get prices of different cryptos using binance api (web)
+* send alerts and messages to a telegram bot
+* add any crypto to favorites board
+* live news
+* feer and greed index
+* dark/light mode
+* button "my wallet" where i can see my money and its evolution
+* Update My Holdings in my wallet
+* button "market" where i can see all about cryptocurrency (charts at differents intervals, order book, set alerts)
+* Cryptos charts with plotly
   
 # Results
-### step 1 :
+## Home page :
+``` Home page with different widgets: list of favorite cryptos (editable), live Fear & Greed Index, live news```
 <p align="center">
-  <img align="center" width=50% src = "https://github.com/user-attachments/assets/4a1c103c-4ad9-48c3-a506-36e34e363849"/>
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/b260ca90-b64d-4a0c-85e7-4ccdfa4e5d89"/>
+</p>
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/669cf2ab-b32c-4c27-b6e1-934ec2516370"/>
+</p>
+<p align="center">
+  
+### Add TAO crypto :
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/962c9c09-28d4-4750-b952-32421aacf0bc"/>
 </p>
 
-### step 2 :
+### TAO on the list :
 <p align="center">
-  <img align="left" width=50% src = "https://github.com/user-attachments/assets/baf7607d-5193-44ad-94f5-88b24f1ac5ea"/>
-</p>
-<p align="center">
-  <img align="center" width=40% src = "https://github.com/user-attachments/assets/6a876df4-162c-41b8-88d7-c8eafa9e1a0f"/>
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/bafac000-752b-40dd-aff6-d075c947a1f6"/>
 </p>
 
-### step 3 :
-``` to send a message on telegram, use this sentence in the terminal :```<br> ```Invoke-WebRequest -Uri "http://localhost:5001/send-message" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"message": "TO THE MOON, BUY NOW !!!!"}' ```
+### Push the up button on TAO :
 <p align="center">
-  <img align="center" width=70% src = "https://github.com/user-attachments/assets/6764ff1c-2f8b-417e-8c12-f9b3e1d118bf"/>
-</p> <br>
-
-<p align="center">
-  <img align="center" width=45% src = "https://github.com/user-attachments/assets/81d09197-5c0a-40b8-9f63-7efe6d654280"/>
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/e0899374-501c-4e16-8aa3-d5bdf98eddac"/>
 </p>
 
+### Dark mode :
 <p align="center">
-  <img align="center" width=40% src = "https://github.com/user-attachments/assets/5b7b90ac-f13a-4f7f-ad90-ae70f683b278"/>
-</p>
-<br>
-
-### step 4 :
-<p align="center">
-  <img align="center" width=50% src = "https://github.com/user-attachments/assets/57aba833-a788-4113-ab44-928edcaabf64"/>
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/4de4e93c-48ad-47fa-9929-caf7f27e9a68"/>
 </p>
 
+## My Wallet :
+``` My wallet with Total Wallet Value in USDT, Crypto breakdown repartition, Update My Holdings and Wallet History at different period```
 <p align="center">
-  <img align="center" width=50% src = "https://github.com/user-attachments/assets/0dea9266-d83e-45e7-9ab7-8ed37c5abcbc"/>
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/443f3e10-6271-463c-a5a4-83d7c20a6ff4"/>
 </p>
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/8ff99d55-38cc-48ce-9dcd-afd2c8e7a4f8"/>
+</p>
+
+## Market :
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/4c6709d0-5431-4551-87cb-4b88f440909d"/>
+</p>
+
+### Charts :
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/2f088069-b465-412c-9aa8-afaa869aa409"/>
+</p>
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/73fd57be-0ee3-4f5c-b91d-6fd75dedda22"/>
+</p>
+
+### Alerts and Order book :
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/53f765f0-1cbc-48aa-adc3-9c277eee7816"/>
+</p>
+
+
 
