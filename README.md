@@ -71,5 +71,20 @@ I reproduced a crypto exchange where the idea was to add as many functions as po
   <img align="center" width=90% src = "https://github.com/user-attachments/assets/53f765f0-1cbc-48aa-adc3-9c277eee7816"/>
 </p>
 
+## ALerts and message on instagram bot :
 
+### alerts:
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/52e5c7b9-1b24-42e0-9691-75b8b85217a0"/>
+</p>
+<p align="center">
+  <img align="center" width=60% src = "https://github.com/user-attachments/assets/358e034a-c791-46f5-8b43-e0ba827d52bc"/>
+</p>
 
+### messages :
+<p align="center">
+  <img align="center" width=90% src = "https://github.com/user-attachments/assets/990f55dd-70d6-4af1-85e4-15cd30899fec"/>
+</p>
+<p align="center">
+  <img align="center" width=60% src = "https://github.com/user-attachments/assets/e9ecd6c9-623b-47d6-abca-8d948006be93"/>
+</p>
